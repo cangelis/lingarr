@@ -128,6 +128,13 @@ public class OpenAiService : BaseLanguageService, ITranslationService, IBatchTra
         await InitializeAsync(sourceLanguage, targetLanguage);
 
         text = ApplyContextIfEnabled(text, contextLinesBefore, contextLinesAfter, previouslyTranslatedContext);
+
+        // DEBUG: Log final prompt (10% probability)
+        if (Random.Shared.NextDouble() < 0.1)
+        {
+            _logger.LogDebug("Final translation prompt:\n{Prompt}", text);
+        }
+
         using var retry = new CancellationTokenSource();
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, retry.Token);
         
