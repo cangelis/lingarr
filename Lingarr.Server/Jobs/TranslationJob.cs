@@ -277,11 +277,11 @@ public class TranslationJob
         }
     }
 
-    private string GetPreviouslyTranslatedContext(
+    private List<string> GetPreviouslyTranslatedContext(
         List<SubtitleItem> subtitles)
     {
         if (_previouslyTranslatedSubtitles.Count == 0)
-            return string.Empty;
+            return new List<string>();
 
         // Since the list is already limited to the configured size,
         // we can use all items in the list
@@ -289,7 +289,7 @@ public class TranslationJob
             .Select(s => s.Text)
             .ToList();
 
-        return string.Join("\n", contextLines);
+        return contextLines;
     }
 
     private void AddToPreviouslyTranslatedSubtitles(List<SubtitleItem> newSubtitles)

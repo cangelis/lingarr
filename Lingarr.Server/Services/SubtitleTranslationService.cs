@@ -35,7 +35,7 @@ public class SubtitleTranslationService
     /// <param name="stripSubtitleFormatting">Boolean used for indicating that styles need to be stripped from the subtitle</param>
     /// <param name="contextBefore">Amount of context before the subtitle line</param>
     /// <param name="contextAfter">Amount of context after the subtitle line</param>
-    /// <param name="previouslyTranslatedContext">Optional context from previously translated lines to prepend to contextBefore</param>
+    /// <param name="previouslyTranslatedContext">Optional context from previously translated lines to include as context</param>
     /// <param name="cancellationToken">Token to support cancellation of the translation operation.</param>
     public async Task<List<SubtitleItem>> TranslateSubtitles(
         List<SubtitleItem> subtitles,
@@ -43,7 +43,7 @@ public class SubtitleTranslationService
         bool stripSubtitleFormatting,
         int contextBefore,
         int contextAfter,
-        string? previouslyTranslatedContext = null,
+        List<string>? previouslyTranslatedContext = null,
         CancellationToken cancellationToken = default)
     {
         if (_progressService == null)
@@ -67,16 +67,6 @@ public class SubtitleTranslationService
             var contextLinesBefore = BuildContext(subtitles, index, contextBefore, stripSubtitleFormatting, true);
             var contextLinesAfter = BuildContext(subtitles, index, contextAfter, stripSubtitleFormatting, false);
 
-            // Parse previously translated context into separate list
-            List<string>? previouslyTranslatedLines = null;
-            if (!string.IsNullOrEmpty(previouslyTranslatedContext))
-            {
-                previouslyTranslatedLines = previouslyTranslatedContext
-                    .Split('\n')
-                    .Where(l => !string.IsNullOrWhiteSpace(l))
-                    .ToList();
-            }
-
             var subtitleLine = string.Join(" ", stripSubtitleFormatting ? subtitle.PlaintextLines : subtitle.Lines);
             var translated = "";
             if (subtitleLine != "")
@@ -88,7 +78,7 @@ public class SubtitleTranslationService
                         TargetLanguage = translationRequest.TargetLanguage,
                         ContextLinesBefore = contextLinesBefore.Count > 0 ? contextLinesBefore : null,
                         ContextLinesAfter = contextLinesAfter.Count > 0 ? contextLinesAfter : null,
-                        PreviouslyTranslatedContextLines = previouslyTranslatedLines?.Count > 0 ? previouslyTranslatedLines : null
+                        PreviouslyTranslatedContextLines = previouslyTranslatedContext?.Count > 0 ? previouslyTranslatedContext : null
                     },
                     cancellationToken);
             }
