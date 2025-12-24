@@ -214,7 +214,6 @@ public class TranslationJob
 
                 // Get previously translated context based on AiContextFromPreviousTranslations setting
                 var previouslyTranslatedContext = GetPreviouslyTranslatedContext(
-                    contextFromPreviousTranslations,
                     subtitles);
 
                 translatedSubtitles = await translator.TranslateSubtitles(
@@ -279,15 +278,14 @@ public class TranslationJob
     }
 
     private string GetPreviouslyTranslatedContext(
-        int contextBeforeLines,
         List<SubtitleItem> subtitles)
     {
-        if (contextBeforeLines <= 0 || _previouslyTranslatedSubtitles.Count == 0)
+        if (_previouslyTranslatedSubtitles.Count == 0)
             return string.Empty;
 
-        // Get the last N lines from previously translated subtitles
+        // Since the list is already limited to the configured size,
+        // we can use all items in the list
         var contextLines = _previouslyTranslatedSubtitles
-            .TakeLast(contextBeforeLines)
             .Select(s => s.Text)
             .ToList();
 
