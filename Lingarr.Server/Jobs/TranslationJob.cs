@@ -48,7 +48,7 @@ public class TranslationJob
         _translationRequestService = translationRequestService;
     }
 
-    private readonly int _maxPreviouslyTranslatedCount;
+    private int _maxPreviouslyTranslatedCount;
     private List<SubtitleItem> _previouslyTranslatedSubtitles = new();
 
     [AutomaticRetry(Attempts = 0)]
@@ -286,7 +286,7 @@ public class TranslationJob
         // Since the list is already limited to the configured size,
         // we can use all items in the list
         var contextLines = _previouslyTranslatedSubtitles
-            .Select(s => s.Text)
+            .Select(s => string.Join(" ", s.TranslatedLines.Count > 0 ? s.TranslatedLines : s.PlaintextLines))
             .ToList();
 
         return contextLines;
