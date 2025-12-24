@@ -107,7 +107,7 @@ public abstract class BaseLanguageService : BaseTranslationService
         _replacements["contextBefore"] = string.Join("\n", contextLinesBefore ?? []);
         _replacements["lineToTranslate"] = text;
         _replacements["contextAfter"] = string.Join("\n", contextLinesAfter ?? []);
-        _replacements["previousContext"] = string.Join("\n", previouslyTranslatedContext ?? []);
+        _replacements["contextTranslated"] = string.Join("\n", previouslyTranslatedContext ?? []);
         return ReplacePlaceholders(_contextPrompt, _replacements);
     }
 
