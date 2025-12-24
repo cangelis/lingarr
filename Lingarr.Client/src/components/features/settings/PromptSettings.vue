@@ -53,13 +53,6 @@
                         validation-type="number"
                         :label="translate('settings.prompt.contextAfter')"
                         @update:validation="(val) => (isValid.contextAfter = val)" />
-                    <InputComponent
-                        v-if="aiContextPromptEnabled == 'true'"
-                        v-model="contextFromPreviousTranslations"
-                        type="number"
-                        validation-type="number"
-                        :label="translate('settings.prompt.contextFromPreviousTranslations')"
-                        @update:validation="(val) => (isValid.contextFromPreviousTranslations = val)" />
                 </div>
                 <div v-else class="text-xs">
                     {{ translate('settings.prompt.notSupported') }}
@@ -83,8 +76,7 @@ const settingsStore = useSettingStore()
 const saveNotification = ref<InstanceType<typeof SaveNotification> | null>(null)
 const isValid = reactive({
     contextBefore: true,
-    contextAfter: true,
-    contextFromPreviousTranslations: true
+    contextAfter: true
 })
 
 const useBatchTranslation = computed(
@@ -114,16 +106,6 @@ const contextAfter = computed({
     set: (newValue: string) => {
         settingsStore.updateSetting(SETTINGS.AI_CONTEXT_AFTER, newValue, isValid.contextAfter)
         if (isValid.contextAfter) {
-            saveNotification.value?.show()
-        }
-    }
-})
-
-const contextFromPreviousTranslations = computed({
-    get: () => settingsStore.getSetting(SETTINGS.AI_CONTEXT_FROM_PREVIOUS_TRANSLATIONS) as string,
-    set: (newValue: string) => {
-        settingsStore.updateSetting(SETTINGS.AI_CONTEXT_FROM_PREVIOUS_TRANSLATIONS, newValue, isValid.contextFromPreviousTranslations)
-        if (isValid.contextFromPreviousTranslations) {
             saveNotification.value?.show()
         }
     }

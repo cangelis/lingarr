@@ -88,7 +88,6 @@ public class TranslationJob
                 SettingKeys.Translation.AiContextBefore,
                 SettingKeys.Translation.AiContextBefore,
                 SettingKeys.Translation.AiContextAfter,
-                SettingKeys.Translation.AiContextFromPreviousTranslations,
                 SettingKeys.Translation.UseBatchTranslation,
                 SettingKeys.Translation.MaxBatchSize,
                 SettingKeys.Translation.RemoveLanguageTag,
@@ -103,7 +102,6 @@ public class TranslationJob
 
             var contextBefore = 0;
             var contextAfter = 0;
-            var contextFromPreviousTranslations = 0;
             if (settings[SettingKeys.Translation.AiContextPromptEnabled] == "true")
             {
                 contextBefore = int.TryParse(settings[SettingKeys.Translation.AiContextBefore],
@@ -114,14 +112,11 @@ public class TranslationJob
                     out var linesAfter)
                     ? linesAfter
                     : 0;
-                contextFromPreviousTranslations = int.TryParse(settings[SettingKeys.Translation.AiContextFromPreviousTranslations],
-                    out var prevLines)
-                    ? prevLines
-                    : 0;
             }
 
             // Initialize the maximum number of previously translated subtitles to keep for context
-            _maxPreviouslyTranslatedCount = contextFromPreviousTranslations;
+            // Using the same value as contextBefore
+            _maxPreviouslyTranslatedCount = contextBefore;
 
             // validate subtitles
             if (validateSubtitles)
