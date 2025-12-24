@@ -105,6 +105,7 @@ public class LibreService : BaseLanguageService
         string targetLanguage,
         List<string>? contextLinesBefore,
         List<string>? contextLinesAfter,
+        List<string>? previouslyTranslatedContext,
         CancellationToken cancellationToken)
     {
         await InitializeAsync();

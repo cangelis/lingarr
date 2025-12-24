@@ -92,13 +92,14 @@ public class DeepSeekService : BaseLanguageService
         string text,
         string sourceLanguage,
         string targetLanguage,
-        List<string>? contextLinesBefore, 
-        List<string>? contextLinesAfter, 
+        List<string>? contextLinesBefore,
+        List<string>? contextLinesAfter,
+        List<string>? previouslyTranslatedContext,
         CancellationToken cancellationToken)
     {
         await InitializeAsync(sourceLanguage, targetLanguage);
 
-        text = ApplyContextIfEnabled(text, contextLinesBefore, contextLinesAfter);
+        text = ApplyContextIfEnabled(text, contextLinesBefore, contextLinesAfter, previouslyTranslatedContext);
 
         return await TranslateWithChatApi(text, cancellationToken);
     }

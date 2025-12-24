@@ -67,11 +67,14 @@ public class SubtitleTranslationService
             var contextLinesBefore = BuildContext(subtitles, index, contextBefore, stripSubtitleFormatting, true);
             var contextLinesAfter = BuildContext(subtitles, index, contextAfter, stripSubtitleFormatting, false);
 
-            // Prepend previously translated context to the regular context if provided
+            // Parse previously translated context into separate list
+            List<string>? previouslyTranslatedLines = null;
             if (!string.IsNullOrEmpty(previouslyTranslatedContext))
             {
-                var previouslyTranslatedLines = previouslyTranslatedContext.Split('\n').Where(l => !string.IsNullOrWhiteSpace(l)).ToList();
-                contextLinesBefore = previouslyTranslatedLines.Concat(contextLinesBefore).ToList();
+                previouslyTranslatedLines = previouslyTranslatedContext
+                    .Split('\n')
+                    .Where(l => !string.IsNullOrWhiteSpace(l))
+                    .ToList();
             }
 
             var subtitleLine = string.Join(" ", stripSubtitleFormatting ? subtitle.PlaintextLines : subtitle.Lines);
@@ -84,7 +87,8 @@ public class SubtitleTranslationService
                         SourceLanguage = translationRequest.SourceLanguage,
                         TargetLanguage = translationRequest.TargetLanguage,
                         ContextLinesBefore = contextLinesBefore.Count > 0 ? contextLinesBefore : null,
-                        ContextLinesAfter = contextLinesAfter.Count > 0 ? contextLinesAfter : null
+                        ContextLinesAfter = contextLinesAfter.Count > 0 ? contextLinesAfter : null,
+                        PreviouslyTranslatedContextLines = previouslyTranslatedLines?.Count > 0 ? previouslyTranslatedLines : null
                     },
                     cancellationToken);
             }
@@ -119,6 +123,7 @@ public class SubtitleTranslationService
                 translateAbleSubtitle.TargetLanguage,
                 translateAbleSubtitle.ContextLinesBefore,
                 translateAbleSubtitle.ContextLinesAfter,
+                translateAbleSubtitle.PreviouslyTranslatedContextLines,
                 cancellationToken);
         }
         catch (TranslationException ex)

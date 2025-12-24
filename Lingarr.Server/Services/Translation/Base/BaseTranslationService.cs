@@ -20,11 +20,12 @@ public abstract class BaseTranslationService : ITranslationService
 
     /// <inheritdoc />
     public abstract Task<string> TranslateAsync(
-        string text, 
-        string sourceLanguage, 
+        string text,
+        string sourceLanguage,
         string targetLanguage,
-        List<string>? contextLinesBefore, 
-        List<string>? contextLinesAfter, 
+        List<string>? contextLinesBefore,
+        List<string>? contextLinesAfter,
+        List<string>? previouslyTranslatedContext,
         CancellationToken cancellationToken);
 
     /// <inheritdoc />

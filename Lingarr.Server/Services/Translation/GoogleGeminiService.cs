@@ -122,11 +122,12 @@ public class GoogleGeminiService : BaseLanguageService, ITranslationService, IBa
         string targetLanguage,
         List<string>? contextLinesBefore,
         List<string>? contextLinesAfter,
+        List<string>? previouslyTranslatedContext,
         CancellationToken cancellationToken)
     {
         await InitializeAsync(sourceLanguage, targetLanguage);
 
-        text = ApplyContextIfEnabled(text, contextLinesBefore, contextLinesAfter);
+        text = ApplyContextIfEnabled(text, contextLinesBefore, contextLinesAfter, previouslyTranslatedContext);
         using var retry = new CancellationTokenSource();
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, retry.Token);
         

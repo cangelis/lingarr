@@ -18,18 +18,20 @@ public interface ITranslationService
     /// <param name="text">The text to be translated.</param>
     /// <param name="sourceLanguage">The language code of the source text.</param>
     /// <param name="targetLanguage">The language code of the desired translation.</param>
-    /// <param name="contextLinesBefore">List of subtitle lines after the subtitle line</param>
+    /// <param name="contextLinesBefore">List of subtitle lines before the subtitle line</param>
     /// <param name="contextLinesAfter">List of subtitle lines after the subtitle line</param>
+    /// <param name="previouslyTranslatedContext">List of previously translated subtitle lines to include as context</param>
     /// <param name="cancellationToken">Token to cancel the translation operation</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the translated text.</returns>
     /// <exception cref="ArgumentException">Thrown when the input parameters are invalid or empty.</exception>
     /// <exception cref="TranslationException">Thrown when an error occurs during the translation process.</exception>
     Task<string> TranslateAsync(
-        string text, 
-        string sourceLanguage, 
-        string targetLanguage, 
-        List<string>? contextLinesBefore, 
-        List<string>? contextLinesAfter, 
+        string text,
+        string sourceLanguage,
+        string targetLanguage,
+        List<string>? contextLinesBefore,
+        List<string>? contextLinesAfter,
+        List<string>? previouslyTranslatedContext,
         CancellationToken cancellationToken);
     
     /// <summary>

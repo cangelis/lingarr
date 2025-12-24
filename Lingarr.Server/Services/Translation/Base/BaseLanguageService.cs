@@ -94,9 +94,10 @@ public abstract class BaseLanguageService : BaseTranslationService
     }
 
     protected string ApplyContextIfEnabled(
-        string text, 
-        List<string>? contextLinesBefore, 
-        List<string>? contextLinesAfter)
+        string text,
+        List<string>? contextLinesBefore,
+        List<string>? contextLinesAfter,
+        List<string>? previouslyTranslatedContext)
     {
         if (_contextPromptEnabled != "true" || string.IsNullOrEmpty(_contextPrompt))
         {
@@ -106,6 +107,7 @@ public abstract class BaseLanguageService : BaseTranslationService
         _replacements["contextBefore"] = string.Join("\n", contextLinesBefore ?? []);
         _replacements["lineToTranslate"] = text;
         _replacements["contextAfter"] = string.Join("\n", contextLinesAfter ?? []);
+        _replacements["previousContext"] = string.Join("\n", previouslyTranslatedContext ?? []);
         return ReplacePlaceholders(_contextPrompt, _replacements);
     }
 

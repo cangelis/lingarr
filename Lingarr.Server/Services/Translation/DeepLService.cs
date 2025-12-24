@@ -136,9 +136,10 @@ public class DeepLService : BaseTranslationService
     public override async Task<string> TranslateAsync(
         string text,
         string sourceLanguage,
-        string targetLanguage, 
-        List<string>? contextLinesBefore, 
-        List<string>? contextLinesAfter, 
+        string targetLanguage,
+        List<string>? contextLinesBefore,
+        List<string>? contextLinesAfter,
+        List<string>? previouslyTranslatedContext,
         CancellationToken cancellationToken)
     {
         await InitializeAsync();
