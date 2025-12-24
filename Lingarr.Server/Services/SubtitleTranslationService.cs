@@ -100,6 +100,16 @@ public class SubtitleTranslationService
 
             iteration++;
             await EmitProgress(translationRequest, iteration, totalSubtitles);
+
+            // Update previously translated context for next subtitle (build as we go)
+            if (previouslyTranslatedContext != null && !string.IsNullOrEmpty(translated))
+            {
+                var translatedLine = string.Join(" ", subtitle.TranslatedLines);
+                if (!string.IsNullOrWhiteSpace(translatedLine))
+                {
+                    previouslyTranslatedContext.Add(translatedLine);
+                }
+            }
         }
 
         _lastProgression = -1;

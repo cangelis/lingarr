@@ -191,6 +191,11 @@ public class TranslationJob
                     "Using batch translation with max batch size: {maxBatchSize} for subtitle: {filePath}",
                     maxSize, translationRequest.SubtitleToTranslate);
 
+                // For batch translation, we can't easily maintain context between items in the batch
+                // So we'll pass an empty context list and add items after
+                var previouslyTranslatedContextForBatch = GetPreviouslyTranslatedContext(
+                    subtitles);
+
                 translatedSubtitles = await translator.TranslateSubtitlesBatch(
                     subtitles,
                     translationRequest,
@@ -198,8 +203,9 @@ public class TranslationJob
                     maxSize,
                     cancellationToken);
 
-                // Update the list of previously translated subtitles for future context (limited to max count)
-                AddToPreviouslyTranslatedSubtitles(translatedSubtitles);
+                // Add all translated subtitles from this batch to our history
+                // (for use in future batches or individual translations)
+                AddToPreviouslyTranslatedSubtitles(previouslyTranslatedContextForBatch);
             }
             else
             {
@@ -208,6 +214,7 @@ public class TranslationJob
                     contextBefore, contextAfter, translationRequest.SubtitleToTranslate);
 
                 // Get previously translated context based on AiContextFromPreviousTranslations setting
+                // Create a new list that will be populated as we translate
                 var previouslyTranslatedContext = GetPreviouslyTranslatedContext(
                     subtitles);
 
@@ -228,7 +235,7 @@ public class TranslationJob
                 );
 
                 // Update the list of previously translated subtitles (limited to max count)
-                AddToPreviouslyTranslatedSubtitles(translatedSubtitles);
+                AddToPreviouslyTranslatedSubtitles(previouslyTranslatedContext);
             }
 
             if (settings[SettingKeys.Translation.FixOverlappingSubtitles] == "true")
