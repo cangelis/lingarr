@@ -88,6 +88,7 @@ public class TranslationJob
                 SettingKeys.Translation.AiContextBefore,
                 SettingKeys.Translation.AiContextBefore,
                 SettingKeys.Translation.AiContextAfter,
+                SettingKeys.Translation.AiContextFromPreviousTranslations,
                 SettingKeys.Translation.UseBatchTranslation,
                 SettingKeys.Translation.MaxBatchSize,
                 SettingKeys.Translation.RemoveLanguageTag,
@@ -102,6 +103,7 @@ public class TranslationJob
 
             var contextBefore = 0;
             var contextAfter = 0;
+            var contextFromPreviousTranslations = 0;
             if (settings[SettingKeys.Translation.AiContextPromptEnabled] == "true")
             {
                 contextBefore = int.TryParse(settings[SettingKeys.Translation.AiContextBefore],
@@ -112,10 +114,14 @@ public class TranslationJob
                     out var linesAfter)
                     ? linesAfter
                     : 0;
+                contextFromPreviousTranslations = int.TryParse(settings[SettingKeys.Translation.AiContextFromPreviousTranslations],
+                    out var prevLines)
+                    ? prevLines
+                    : 0;
             }
 
             // Initialize the maximum number of previously translated subtitles to keep for context
-            _maxPreviouslyTranslatedCount = contextBefore;
+            _maxPreviouslyTranslatedCount = contextFromPreviousTranslations;
 
             // validate subtitles
             if (validateSubtitles)
@@ -206,9 +212,9 @@ public class TranslationJob
                     "Using individual translation with context (before: {contextBefore}, after: {contextAfter}) for subtitle: {filePath}",
                     contextBefore, contextAfter, translationRequest.SubtitleToTranslate);
 
-                // Get previously translated context based on AiContextBefore setting
+                // Get previously translated context based on AiContextFromPreviousTranslations setting
                 var previouslyTranslatedContext = GetPreviouslyTranslatedContext(
-                    contextBefore,
+                    contextFromPreviousTranslations,
                     subtitles);
 
                 translatedSubtitles = await translator.TranslateSubtitles(
