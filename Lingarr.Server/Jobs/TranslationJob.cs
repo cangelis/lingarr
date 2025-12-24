@@ -211,6 +211,12 @@ public class TranslationJob
                 var previouslyTranslatedContext = GetPreviouslyTranslatedContext(
                     subtitles);
 
+                _logger.LogDebug("DEBUG: Previously translated context lines: {Count}", previouslyTranslatedContext.Count);
+                foreach (var line in previouslyTranslatedContext)
+                {
+                    _logger.LogDebug("  - {Line}", line);
+                }
+
                 translatedSubtitles = await translator.TranslateSubtitles(
                     subtitles,
                     request,
