@@ -108,6 +108,12 @@ public class SubtitleTranslationService
                 if (!string.IsNullOrWhiteSpace(translatedLine))
                 {
                     previouslyTranslatedContext.Add(translatedLine);
+                    // Keep only the last N items based on contextBefore setting
+                    var maxItems = _maxPreviouslyTranslatedCount > 0 ? _maxPreviouslyTranslatedCount : 0;
+                    if (maxItems > 0 && previouslyTranslatedContext.Count > maxItems)
+                    {
+                        previouslyTranslatedContext.RemoveAt(0);
+                    }
                 }
             }
         }
