@@ -205,7 +205,7 @@ public class TranslationJob
 
                 // Add all translated subtitles from this batch to our history
                 // (for use in future batches or individual translations)
-                AddToPreviouslyTranslatedSubtitles(previouslyTranslatedContextForBatch);
+                AddToPreviouslyTranslatedSubtitles(translatedSubtitles);
             }
             else
             {
@@ -235,7 +235,11 @@ public class TranslationJob
                 );
 
                 // Update the list of previously translated subtitles (limited to max count)
-                AddToPreviouslyTranslatedSubtitles(previouslyTranslatedContext);
+                // Use the last N items from translatedSubtitles
+                var itemsToAdd = translatedSubtitles
+                    .TakeLast(Math.Min(_maxPreviouslyTranslatedCount, translatedSubtitles.Count))
+                    .ToList();
+                AddToPreviouslyTranslatedSubtitles(itemsToAdd);
             }
 
             if (settings[SettingKeys.Translation.FixOverlappingSubtitles] == "true")
