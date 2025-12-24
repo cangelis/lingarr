@@ -104,10 +104,21 @@ public abstract class BaseLanguageService : BaseTranslationService
             return text;
         }
 
-        _replacements["contextBefore"] = string.Join("\n", contextLinesBefore ?? []);
+        // Wrap each context line with <line> tags
+        var contextBeforeFormatted = contextLinesBefore?.Count > 0
+            ? string.Join("\n", contextLinesBefore.Select(line => $"<line>{line}</line>"))
+            : "";
+        var contextAfterFormatted = contextLinesAfter?.Count > 0
+            ? string.Join("\n", contextLinesAfter.Select(line => $"<line>{line}</line>"))
+            : "";
+        var contextTranslatedFormatted = previouslyTranslatedContext?.Count > 0
+            ? string.Join("\n", previouslyTranslatedContext.Select(line => $"<line>{line}</line>"))
+            : "";
+
+        _replacements["contextBefore"] = contextBeforeFormatted;
         _replacements["lineToTranslate"] = text;
-        _replacements["contextAfter"] = string.Join("\n", contextLinesAfter ?? []);
-        _replacements["contextTranslated"] = string.Join("\n", previouslyTranslatedContext ?? []);
+        _replacements["contextAfter"] = contextAfterFormatted;
+        _replacements["contextTranslated"] = contextTranslatedFormatted;
 
         var result = ReplacePlaceholders(_contextPrompt, _replacements);
 
