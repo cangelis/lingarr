@@ -242,6 +242,7 @@
       "contextPromptDescription": "Provide the surrounding context, including lines before and after the current subtitle, to help the AI generate a more accurate translation.",
       "contextBefore": "Lines of context to add before the subtitle line:",
       "contextAfter": "Lines of context to add after the subtitle line:",
+      "contextFromPreviousTranslations": "Lines of previously translated context to include:",
       "enterYourPromptHere": "Enter your prompt here",
       "missingPlaceholders": "Required placeholders missing:",
       "insertPlaceholder": "insert {placeholder}",
