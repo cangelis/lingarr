@@ -231,6 +231,7 @@ public class TranslationJob
                     contextBefore,
                     contextAfter,
                     previouslyTranslatedContext,
+                    _maxPreviouslyTranslatedCount,
                     cancellationToken
                 );
 

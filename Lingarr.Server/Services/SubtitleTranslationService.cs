@@ -36,6 +36,7 @@ public class SubtitleTranslationService
     /// <param name="contextBefore">Amount of context before the subtitle line</param>
     /// <param name="contextAfter">Amount of context after the subtitle line</param>
     /// <param name="previouslyTranslatedContext">Optional context from previously translated lines to include as context</param>
+    /// <param name="maxPreviouslyTranslatedCount">Maximum number of previously translated lines to keep</param>
     /// <param name="cancellationToken">Token to support cancellation of the translation operation.</param>
     public async Task<List<SubtitleItem>> TranslateSubtitles(
         List<SubtitleItem> subtitles,
@@ -44,6 +45,7 @@ public class SubtitleTranslationService
         int contextBefore,
         int contextAfter,
         List<string>? previouslyTranslatedContext = null,
+        int maxPreviouslyTranslatedCount = 0,
         CancellationToken cancellationToken = default)
     {
         if (_progressService == null)
@@ -109,7 +111,7 @@ public class SubtitleTranslationService
                 {
                     previouslyTranslatedContext.Add(translatedLine);
                     // Keep only the last N items based on contextBefore setting
-                    var maxItems = _maxPreviouslyTranslatedCount > 0 ? _maxPreviouslyTranslatedCount : 0;
+                    var maxItems = maxPreviouslyTranslatedCount > 0 ? maxPreviouslyTranslatedCount : 0;
                     if (maxItems > 0 && previouslyTranslatedContext.Count > maxItems)
                     {
                         previouslyTranslatedContext.RemoveAt(0);
