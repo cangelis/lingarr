@@ -189,7 +189,8 @@ public class OpenAiService : BaseLanguageService, ITranslationService, IBatchTra
                     throw new TranslationException("No completion choices returned from OpenAI");
                 }
 
-                return completionResponse.Choices[0].Message.Content;
+                var rawResponse = completionResponse.Choices[0].Message.Content;
+                return ExtractSegmentFromResponse(rawResponse);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.TooManyRequests)
             {
