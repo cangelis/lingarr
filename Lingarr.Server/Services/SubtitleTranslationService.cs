@@ -71,18 +71,6 @@ public class SubtitleTranslationService
 
             var subtitleLine = string.Join(" ", stripSubtitleFormatting ? subtitle.PlaintextLines : subtitle.Lines);
 
-            // DEBUG: Log previously translated context
-            _logger.LogDebug("DEBUG: Processing subtitle {Index}, previouslyTranslatedContext count: {Count}",
-                index, previouslyTranslatedContext?.Count ?? 0);
-            if (previouslyTranslatedContext != null && previouslyTranslatedContext.Count > 0)
-            {
-                _logger.LogDebug("  Context lines:");
-                foreach (var ctx in previouslyTranslatedContext)
-                {
-                    _logger.LogDebug("    - {Ctx}", ctx);
-                }
-            }
-
             var translated = "";
             if (subtitleLine != "")
             {
@@ -136,10 +124,6 @@ public class SubtitleTranslationService
         TranslateAbleSubtitleLine translateAbleSubtitle,
         CancellationToken cancellationToken)
     {
-        // DEBUG: Check if previously translated context was passed
-        _logger.LogDebug("DEBUG: TranslateSubtitleLine - PreviouslyTranslatedContextLines count: {Count}",
-            translateAbleSubtitle.PreviouslyTranslatedContextLines?.Count ?? 0);
-
         try
         {
             return await _translationService.TranslateAsync(
