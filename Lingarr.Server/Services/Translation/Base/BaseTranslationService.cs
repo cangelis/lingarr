@@ -20,16 +20,45 @@ public abstract class BaseTranslationService : ITranslationService
 
     /// <inheritdoc />
     public abstract Task<string> TranslateAsync(
-        string text, 
-        string sourceLanguage, 
+        string text,
+        string sourceLanguage,
         string targetLanguage,
-        List<string>? contextLinesBefore, 
-        List<string>? contextLinesAfter, 
+        List<string>? contextLinesBefore,
+        List<string>? contextLinesAfter,
+        List<string>? previouslyTranslatedContext,
         CancellationToken cancellationToken);
 
     /// <inheritdoc />
     public abstract Task<List<SourceLanguage>> GetLanguages();
-    
+
     /// <inheritdoc />
     public abstract Task<ModelsResponse> GetModels();
+
+    /// <summary>
+    /// Extracts the segment content from an AI response that may contain metadata tags.
+    /// If no segment tags are found, returns the full response.
+    /// </summary>
+    /// <param name="response">The AI translation response</param>
+    /// <returns>The extracted segment or full response if no segment found</returns>
+    protected string ExtractSegmentFromResponse(string response)
+    {
+        if (string.IsNullOrWhiteSpace(response))
+            return response;
+
+        // Look for <segment>...</segment> tags
+        var segmentPattern = @"<segment>(.*?)</segment>";
+        var match = System.Text.RegularExpressions.Regex.Match(
+            response,
+            segmentPattern,
+            System.Text.RegularExpressions.RegexOptions.Singleline
+        );
+
+        if (match.Success && match.Groups.Count > 1)
+        {
+            return match.Groups[1].Value.Trim();
+        }
+
+        // If no segment tags found, return the full response
+        return response;
+    }
 }

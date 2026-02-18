@@ -24,11 +24,12 @@ public class GTranslatorService<T> : BaseLanguageService where T : ITranslator
     
     /// <inheritdoc />
     public override async Task<string> TranslateAsync(
-        string text, 
-        string sourceLanguage, 
+        string text,
+        string sourceLanguage,
         string targetLanguage,
-        List<string>? contextLinesBefore, 
-        List<string>? contextLinesAfter, 
+        List<string>? contextLinesBefore,
+        List<string>? contextLinesAfter,
+        List<string>? previouslyTranslatedContext,
         CancellationToken cancellationToken)
     {
         using var retry = new CancellationTokenSource();

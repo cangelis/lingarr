@@ -48,6 +48,15 @@
                 title: translate('settings.prompt.placeholders.contextAfter.title'),
                 description: translate('settings.prompt.placeholders.contextAfter.description'),
                 required: false
+            },
+            {
+                placeholder: '{contextTranslated}',
+                placeholderText: translate('settings.prompt.insertPlaceholder').format({
+                    placeholder: '{contextTranslated}'
+                }),
+                title: translate('settings.prompt.placeholders.contextTranslated.title'),
+                description: translate('settings.prompt.placeholders.contextTranslated.description'),
+                required: false
             }
         ]"
         @update:validation="(val) => (isValid = val)" />

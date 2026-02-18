@@ -48,6 +48,9 @@ public class TranslationJob
         _translationRequestService = translationRequestService;
     }
 
+    private int _maxPreviouslyTranslatedCount;
+    private List<SubtitleItem> _previouslyTranslatedSubtitles = new();
+
     [AutomaticRetry(Attempts = 0)]
     [Queue("translation")]
     public async Task Execute(
@@ -110,6 +113,10 @@ public class TranslationJob
                     ? linesAfter
                     : 0;
             }
+
+            // Initialize the maximum number of previously translated subtitles to keep for context
+            // Using the same value as contextBefore
+            _maxPreviouslyTranslatedCount = contextBefore;
 
             // validate subtitles
             if (validateSubtitles)
@@ -184,12 +191,21 @@ public class TranslationJob
                     "Using batch translation with max batch size: {maxBatchSize} for subtitle: {filePath}",
                     maxSize, translationRequest.SubtitleToTranslate);
 
+                // For batch translation, we can't easily maintain context between items in the batch
+                // So we'll pass an empty context list and add items after
+                var previouslyTranslatedContextForBatch = GetPreviouslyTranslatedContext(
+                    subtitles);
+
                 translatedSubtitles = await translator.TranslateSubtitlesBatch(
                     subtitles,
                     translationRequest,
                     stripSubtitleFormatting,
                     maxSize,
                     cancellationToken);
+
+                // Add all translated subtitles from this batch to our history
+                // (for use in future batches or individual translations)
+                AddToPreviouslyTranslatedSubtitles(translatedSubtitles);
             }
             else
             {
@@ -197,14 +213,28 @@ public class TranslationJob
                     "Using individual translation with context (before: {contextBefore}, after: {contextAfter}) for subtitle: {filePath}",
                     contextBefore, contextAfter, translationRequest.SubtitleToTranslate);
 
+                // Get previously translated context based on AiContextFromPreviousTranslations setting
+                // Create a new list that will be populated as we translate
+                var previouslyTranslatedContext = GetPreviouslyTranslatedContext(
+                    subtitles);
+
                 translatedSubtitles = await translator.TranslateSubtitles(
                     subtitles,
                     request,
                     stripSubtitleFormatting,
                     contextBefore,
                     contextAfter,
+                    previouslyTranslatedContext,
+                    _maxPreviouslyTranslatedCount,
                     cancellationToken
                 );
+
+                // Update the list of previously translated subtitles (limited to max count)
+                // Use the last N items from translatedSubtitles
+                var itemsToAdd = translatedSubtitles
+                    .TakeLast(Math.Min(_maxPreviouslyTranslatedCount, translatedSubtitles.Count))
+                    .ToList();
+                AddToPreviouslyTranslatedSubtitles(itemsToAdd);
             }
 
             if (settings[SettingKeys.Translation.FixOverlappingSubtitles] == "true")
@@ -251,6 +281,37 @@ public class TranslationJob
             await _translationRequestService.UpdateActiveCount();
             await _progressService.Emit(translationRequest, 0);
             throw;
+        }
+    }
+
+    private List<string> GetPreviouslyTranslatedContext(
+        List<SubtitleItem> subtitles)
+    {
+        if (_previouslyTranslatedSubtitles.Count == 0)
+            return new List<string>();
+
+        // Since the list is already limited to the configured size,
+        // we can use all items in the list
+        var contextLines = _previouslyTranslatedSubtitles
+            .Select(s => string.Join(" ", s.TranslatedLines.Count > 0 ? s.TranslatedLines : s.PlaintextLines))
+            .ToList();
+
+        return contextLines;
+    }
+
+    private void AddToPreviouslyTranslatedSubtitles(List<SubtitleItem> newSubtitles)
+    {
+        if (_maxPreviouslyTranslatedCount <= 0)
+            return;
+
+        _previouslyTranslatedSubtitles.AddRange(newSubtitles);
+
+        // Keep only the last N items based on the max count
+        if (_previouslyTranslatedSubtitles.Count > _maxPreviouslyTranslatedCount)
+        {
+            _previouslyTranslatedSubtitles = _previouslyTranslatedSubtitles
+                .TakeLast(_maxPreviouslyTranslatedCount)
+                .ToList();
         }
     }
 

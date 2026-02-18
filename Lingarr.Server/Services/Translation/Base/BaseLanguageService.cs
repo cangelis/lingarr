@@ -94,19 +94,38 @@ public abstract class BaseLanguageService : BaseTranslationService
     }
 
     protected string ApplyContextIfEnabled(
-        string text, 
-        List<string>? contextLinesBefore, 
-        List<string>? contextLinesAfter)
+        string text,
+        List<string>? contextLinesBefore,
+        List<string>? contextLinesAfter,
+        List<string>? previouslyTranslatedContext)
     {
         if (_contextPromptEnabled != "true" || string.IsNullOrEmpty(_contextPrompt))
         {
             return text;
         }
 
-        _replacements["contextBefore"] = string.Join("\n", contextLinesBefore ?? []);
+        // Wrap each context line with <line> tags
+        var contextBeforeFormatted = contextLinesBefore?.Count > 0
+            ? string.Join("\n", contextLinesBefore.Select(line => $"<line>{line}</line>"))
+            : "";
+        var contextAfterFormatted = contextLinesAfter?.Count > 0
+            ? string.Join("\n", contextLinesAfter.Select(line => $"<line>{line}</line>"))
+            : "";
+        var contextTranslatedFormatted = previouslyTranslatedContext?.Count > 0
+            ? string.Join("\n", previouslyTranslatedContext.Select(line => $"<line>{line}</line>"))
+            : "";
+
+        _replacements["contextBefore"] = contextBeforeFormatted;
         _replacements["lineToTranslate"] = text;
-        _replacements["contextAfter"] = string.Join("\n", contextLinesAfter ?? []);
-        return ReplacePlaceholders(_contextPrompt, _replacements);
+        _replacements["contextAfter"] = contextAfterFormatted;
+        _replacements["contextTranslated"] = contextTranslatedFormatted;
+
+        var result = ReplacePlaceholders(_contextPrompt, _replacements);
+
+        // DEBUG: Log the final prompt
+        _logger.LogDebug("Final translation prompt:\n{Prompt}", result);
+
+        return result;
     }
 
     

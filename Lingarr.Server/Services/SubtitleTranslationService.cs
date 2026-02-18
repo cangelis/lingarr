@@ -35,6 +35,8 @@ public class SubtitleTranslationService
     /// <param name="stripSubtitleFormatting">Boolean used for indicating that styles need to be stripped from the subtitle</param>
     /// <param name="contextBefore">Amount of context before the subtitle line</param>
     /// <param name="contextAfter">Amount of context after the subtitle line</param>
+    /// <param name="previouslyTranslatedContext">Optional context from previously translated lines to include as context</param>
+    /// <param name="maxPreviouslyTranslatedCount">Maximum number of previously translated lines to keep</param>
     /// <param name="cancellationToken">Token to support cancellation of the translation operation.</param>
     public async Task<List<SubtitleItem>> TranslateSubtitles(
         List<SubtitleItem> subtitles,
@@ -42,7 +44,9 @@ public class SubtitleTranslationService
         bool stripSubtitleFormatting,
         int contextBefore,
         int contextAfter,
-        CancellationToken cancellationToken)
+        List<string>? previouslyTranslatedContext = null,
+        int maxPreviouslyTranslatedCount = 0,
+        CancellationToken cancellationToken = default)
     {
         if (_progressService == null)
         {
@@ -66,6 +70,7 @@ public class SubtitleTranslationService
             var contextLinesAfter = BuildContext(subtitles, index, contextAfter, stripSubtitleFormatting, false);
 
             var subtitleLine = string.Join(" ", stripSubtitleFormatting ? subtitle.PlaintextLines : subtitle.Lines);
+
             var translated = "";
             if (subtitleLine != "")
             {
@@ -75,7 +80,8 @@ public class SubtitleTranslationService
                         SourceLanguage = translationRequest.SourceLanguage,
                         TargetLanguage = translationRequest.TargetLanguage,
                         ContextLinesBefore = contextLinesBefore.Count > 0 ? contextLinesBefore : null,
-                        ContextLinesAfter = contextLinesAfter.Count > 0 ? contextLinesAfter : null
+                        ContextLinesAfter = contextLinesAfter.Count > 0 ? contextLinesAfter : null,
+                        PreviouslyTranslatedContextLines = previouslyTranslatedContext?.Count > 0 ? previouslyTranslatedContext : null
                     },
                     cancellationToken);
             }
@@ -84,6 +90,22 @@ public class SubtitleTranslationService
 
             iteration++;
             await EmitProgress(translationRequest, iteration, totalSubtitles);
+
+            // Update previously translated context for next subtitle (build as we go)
+            if (previouslyTranslatedContext != null && !string.IsNullOrEmpty(translated))
+            {
+                var translatedLine = string.Join(" ", subtitle.TranslatedLines);
+                if (!string.IsNullOrWhiteSpace(translatedLine))
+                {
+                    previouslyTranslatedContext.Add(translatedLine);
+                    // Keep only the last N items based on contextBefore setting
+                    var maxItems = maxPreviouslyTranslatedCount > 0 ? maxPreviouslyTranslatedCount : 0;
+                    if (maxItems > 0 && previouslyTranslatedContext.Count > maxItems)
+                    {
+                        previouslyTranslatedContext.RemoveAt(0);
+                    }
+                }
+            }
         }
 
         _lastProgression = -1;
@@ -110,6 +132,7 @@ public class SubtitleTranslationService
                 translateAbleSubtitle.TargetLanguage,
                 translateAbleSubtitle.ContextLinesBefore,
                 translateAbleSubtitle.ContextLinesAfter,
+                translateAbleSubtitle.PreviouslyTranslatedContextLines,
                 cancellationToken);
         }
         catch (TranslationException ex)

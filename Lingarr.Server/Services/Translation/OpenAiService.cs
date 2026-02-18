@@ -122,11 +122,13 @@ public class OpenAiService : BaseLanguageService, ITranslationService, IBatchTra
         string targetLanguage,
         List<string>? contextLinesBefore,
         List<string>? contextLinesAfter,
+        List<string>? previouslyTranslatedContext,
         CancellationToken cancellationToken)
     {
         await InitializeAsync(sourceLanguage, targetLanguage);
 
-        text = ApplyContextIfEnabled(text, contextLinesBefore, contextLinesAfter);
+        text = ApplyContextIfEnabled(text, contextLinesBefore, contextLinesAfter, previouslyTranslatedContext);
+
         using var retry = new CancellationTokenSource();
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, retry.Token);
         
@@ -187,7 +189,8 @@ public class OpenAiService : BaseLanguageService, ITranslationService, IBatchTra
                     throw new TranslationException("No completion choices returned from OpenAI");
                 }
 
-                return completionResponse.Choices[0].Message.Content;
+                var rawResponse = completionResponse.Choices[0].Message.Content;
+                return ExtractSegmentFromResponse(rawResponse);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.TooManyRequests)
             {
